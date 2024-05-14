@@ -5,38 +5,51 @@ const Test = ({ preguntas }) => {
   const [respuestasCorrectas, setRespuestasCorrectas] = useState(Array(preguntas.length).fill(null));
   const [respuestasIncorrectas, setRespuestasIncorrectas] = useState([]);
   const [juegoTerminado, setJuegoTerminado] = useState(false);
+  const [respuestaSeleccionada, setRespuestaSeleccionada] = useState(false);
 
   const preguntaActual = preguntas[indicePregunta];
 
   const manejarRespuesta = (indiceRespuesta) => {
     const respuestaCorrecta = preguntaActual.respuesta_correcta;
     const respuestaUsuarioCorrecta = indiceRespuesta === respuestaCorrecta;
-
+  
     const nuevasRespuestas = [...respuestasCorrectas];
     nuevasRespuestas[indicePregunta] = respuestaUsuarioCorrecta;
     setRespuestasCorrectas(nuevasRespuestas);
-
+  
     if (!respuestaUsuarioCorrecta) {
-      setRespuestasIncorrectas([
-        ...respuestasIncorrectas,
-        { pregunta: preguntaActual.pregunta, opcionUsuario: indiceRespuesta, opcionCorrecta: respuestaCorrecta }
-      ]);
+      const preguntaRepetida = respuestasIncorrectas.find(respuesta => respuesta.indicePregunta === indicePregunta);
+      if (!preguntaRepetida) {
+        setRespuestasIncorrectas([
+          ...respuestasIncorrectas,
+          { indicePregunta: indicePregunta, opcionUsuario: indiceRespuesta, opcionCorrecta: respuestaCorrecta }
+        ]);
+      }
     }
-
-    const proximoIndice = indicePregunta + 1;
-    if (proximoIndice < preguntas.length) {
-      setIndicePregunta(proximoIndice);
-    } else {
-      // Fin del test, mostrar el resultado
-      setJuegoTerminado(true);
-    }
+  
+    setRespuestaSeleccionada(true);
   };
+  
+  
 
   const reiniciarJuego = () => {
     setIndicePregunta(0);
     setRespuestasCorrectas(Array(preguntas.length).fill(null));
     setRespuestasIncorrectas([]);
     setJuegoTerminado(false);
+    setRespuestaSeleccionada(false);
+  };
+
+  const siguientePregunta = () => {
+    if (respuestaSeleccionada) {
+      const proximoIndice = indicePregunta + 1;
+      if (proximoIndice < preguntas.length) {
+        setIndicePregunta(proximoIndice);
+        setRespuestaSeleccionada(false);
+      } else {
+        setJuegoTerminado(true);
+      }
+    }
   };
 
   return (
@@ -45,6 +58,8 @@ const Test = ({ preguntas }) => {
         <Pregunta
           pregunta={preguntaActual}
           onSeleccionarRespuesta={manejarRespuesta}
+          siguientePregunta={siguientePregunta}
+          respuestaSeleccionada={respuestaSeleccionada}
         />
       ) : (
         <Resultado
@@ -58,7 +73,7 @@ const Test = ({ preguntas }) => {
   );
 };
 
-const Pregunta = ({ pregunta, onSeleccionarRespuesta, onSiguientePregunta }) => {
+const Pregunta = ({ pregunta, onSeleccionarRespuesta, siguientePregunta, respuestaSeleccionada }) => {
   const { pregunta: textoPregunta, respuestas } = pregunta;
 
   return (
@@ -73,20 +88,22 @@ const Pregunta = ({ pregunta, onSeleccionarRespuesta, onSiguientePregunta }) => 
           />
         ))}
       </div>
-      <button onClick={onSiguientePregunta}>Siguiente Pregunta</button>
+      <button onClick={siguientePregunta} disabled={!respuestaSeleccionada}>Siguiente Pregunta</button>
     </div>
   );
 };
 
-
-const Respuesta = ({ texto, onClick }) => {
+const Respuesta = ({ texto, onClick, seleccionada }) => {
   return (
-    <div className="respuesta">
-      <input type="radio" onClick={onClick} />
-      <label>{texto}</label>
+    <div className={`respuesta ${seleccionada ? 'seleccionada' : ''}`} onClick={onClick}>
+      <input type="radio" style={{ display: "none" }} />
+      <label style={seleccionada ? { backgroundColor: '#ba9a39', color: 'white' } : {}}>
+        {texto}
+      </label>
     </div>
   );
 };
+
 
 const Resultado = ({ respuestasCorrectas, respuestasIncorrectas, preguntas, onReiniciarJuego }) => {
   return (
@@ -108,11 +125,11 @@ const Resultado = ({ respuestasCorrectas, respuestasIncorrectas, preguntas, onRe
       <ul>
         {respuestasIncorrectas.map((respuesta, index) => (
           <li key={index}>
-            <strong>{respuesta.pregunta}</strong>
+            <strong>{preguntas[respuesta.indicePregunta].pregunta}</strong>
             <br />
-            <span>Seleccionaste: {preguntas[respuesta.opcionUsuario].respuestas[respuesta.opcionUsuario]}</span>
+            <span>Seleccionaste: {preguntas[respuesta.indicePregunta].respuestas[respuesta.opcionUsuario]}</span>
             <br />
-            <span>Respuesta correcta: {preguntas[respuesta.opcionCorrecta].respuestas[respuesta.opcionCorrecta]}</span>
+            <span>Respuesta correcta: {preguntas[respuesta.indicePregunta].respuestas[respuesta.opcionCorrecta]}</span>
           </li>
         ))}
       </ul>
@@ -120,5 +137,7 @@ const Resultado = ({ respuestasCorrectas, respuestasIncorrectas, preguntas, onRe
     </div>
   );
 };
+
+
 
 export default Test;
