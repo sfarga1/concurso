@@ -47,15 +47,28 @@ header:hover {
 }
 
 .pregunta {
-  width: 50%;
-  margin: 10px;
+  width: 60%; /* Modifica el ancho según tus necesidades */
+  margin: 200px auto 20px; /* Auto-margen vertical y horizontal */
   background-color: rgba(255, 255, 255, 0.7);
   border-radius: 20px;
   border: 1px solid black;
-  height: auto;
-  flex: 1;
-  margin: 20px;
+  padding-bottom: 20px;
 }
+
+.resultado {
+  margin-top: 30px;
+  width: 60%; /* Modifica el ancho según tus necesidades */
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  border: 1px solid black;
+  padding-bottom: 20px;
+  margin-left: 20%;
+}
+
+.resultado ul {
+  list-style-type: none; /* Elimina los puntos de la lista */
+}
+
 
 .respuesta {
   text-align: left;

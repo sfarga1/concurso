@@ -96,7 +96,7 @@ const preguntas = [
             "Arrio",
             "Cirilo de Alejandría",
             "El emperador romano Juliano el Apóstata",
-            "Nestorio"
+            "Nestorio de Constantinopla"
         ],
         "respuesta_correcta": 3
     }

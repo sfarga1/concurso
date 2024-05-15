@@ -6,17 +6,18 @@ const Test = ({ preguntas }) => {
   const [respuestasIncorrectas, setRespuestasIncorrectas] = useState([]);
   const [juegoTerminado, setJuegoTerminado] = useState(false);
   const [respuestaSeleccionada, setRespuestaSeleccionada] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState(null); // nuevo estado
 
   const preguntaActual = preguntas[indicePregunta];
 
   const manejarRespuesta = (indiceRespuesta) => {
     const respuestaCorrecta = preguntaActual.respuesta_correcta;
     const respuestaUsuarioCorrecta = indiceRespuesta === respuestaCorrecta;
-  
+
     const nuevasRespuestas = [...respuestasCorrectas];
     nuevasRespuestas[indicePregunta] = respuestaUsuarioCorrecta;
     setRespuestasCorrectas(nuevasRespuestas);
-  
+
     if (!respuestaUsuarioCorrecta) {
       const preguntaRepetida = respuestasIncorrectas.find(respuesta => respuesta.indicePregunta === indicePregunta);
       if (!preguntaRepetida) {
@@ -26,11 +27,10 @@ const Test = ({ preguntas }) => {
         ]);
       }
     }
-  
+
     setRespuestaSeleccionada(true);
+    setSelectedAnswer(indiceRespuesta); // actualizamos el estado
   };
-  
-  
 
   const reiniciarJuego = () => {
     setIndicePregunta(0);
@@ -38,6 +38,7 @@ const Test = ({ preguntas }) => {
     setRespuestasIncorrectas([]);
     setJuegoTerminado(false);
     setRespuestaSeleccionada(false);
+    setSelectedAnswer(null); // reiniciar el estado
   };
 
   const siguientePregunta = () => {
@@ -46,6 +47,7 @@ const Test = ({ preguntas }) => {
       if (proximoIndice < preguntas.length) {
         setIndicePregunta(proximoIndice);
         setRespuestaSeleccionada(false);
+        setSelectedAnswer(null); // reiniciar el estado
       } else {
         setJuegoTerminado(true);
       }
@@ -60,6 +62,7 @@ const Test = ({ preguntas }) => {
           onSeleccionarRespuesta={manejarRespuesta}
           siguientePregunta={siguientePregunta}
           respuestaSeleccionada={respuestaSeleccionada}
+          selectedAnswer={selectedAnswer} // pasamos el estado
         />
       ) : (
         <Resultado
@@ -73,7 +76,7 @@ const Test = ({ preguntas }) => {
   );
 };
 
-const Pregunta = ({ pregunta, onSeleccionarRespuesta, siguientePregunta, respuestaSeleccionada }) => {
+const Pregunta = ({ pregunta, onSeleccionarRespuesta, siguientePregunta, respuestaSeleccionada, selectedAnswer }) => {
   const { pregunta: textoPregunta, respuestas } = pregunta;
 
   return (
@@ -85,6 +88,7 @@ const Pregunta = ({ pregunta, onSeleccionarRespuesta, siguientePregunta, respues
             key={indice}
             texto={respuesta}
             onClick={() => onSeleccionarRespuesta(indice)}
+            seleccionada={selectedAnswer === indice} // pasamos si está seleccionada
           />
         ))}
       </div>
@@ -96,7 +100,7 @@ const Pregunta = ({ pregunta, onSeleccionarRespuesta, siguientePregunta, respues
 const Respuesta = ({ texto, onClick, seleccionada }) => {
   return (
     <div className={`respuesta ${seleccionada ? 'seleccionada' : ''}`} onClick={onClick}>
-      <input type="radio" style={{ display: "none" }} />
+      <input type="radio" style={{ display: "none" }} checked={seleccionada} readOnly />
       <label style={seleccionada ? { backgroundColor: '#ba9a39', color: 'white' } : {}}>
         {texto}
       </label>
@@ -104,10 +108,9 @@ const Respuesta = ({ texto, onClick, seleccionada }) => {
   );
 };
 
-
 const Resultado = ({ respuestasCorrectas, respuestasIncorrectas, preguntas, onReiniciarJuego }) => {
   return (
-    <div>
+    <div className="resultado">
       <h2>Resultado del juego</h2>
       <h3>Respuestas correctas:</h3>
       <ul>
@@ -116,7 +119,7 @@ const Resultado = ({ respuestasCorrectas, respuestasIncorrectas, preguntas, onRe
             <li key={index}>
               {pregunta.pregunta}
               <br />
-              <span>Respuesta correcta: {pregunta.respuestas[pregunta.respuesta_correcta]}</span>
+              <span>Respuesta: {pregunta.respuestas[pregunta.respuesta_correcta]}</span>
             </li>
           ) : null
         ))}
@@ -137,7 +140,5 @@ const Resultado = ({ respuestasCorrectas, respuestasIncorrectas, preguntas, onRe
     </div>
   );
 };
-
-
 
 export default Test;
